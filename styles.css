@@ -1,0 +1,824 @@
+/* ==========================================================================
+   Lumid AI — Waiting Page
+   Rebuilt from Figma (file QsxI3BM8ES964goG8VEINm, node 1:189).
+   Fluid layout for desktop / laptop / PC screens: every position and size
+   is a ratio of the Figma reference canvas (1728x1117), expressed in vw/vh
+   and clamp() so proportions hold correctly across desktop-class widths
+   (~1280–2560px) without a fixed canvas or a scaling wrapper. Not a
+   dedicated mobile redesign — this targets desktop/laptop/PC viewports.
+
+   Design language: Apple HIG-inspired — generous negative space, a calm
+   restrained hierarchy (one strong focal point, everything else quiet),
+   the system font stack so Apple devices render true San Francisco,
+   soft/short transitions with a standard ease curve, and visible,
+   accessible focus states on every interactive element.
+   ========================================================================== */
+
+:root {
+  --brand: #02996c;
+  --heading-dark: #003e42;
+  --heading-light: rgba(0, 62, 66, 0.6);
+  --body-gray: #48504c;
+
+  /* Typography substitutes (see project notes: originals are paid fonts).
+     -apple-system / BlinkMacSystemFont lead the body + headline stacks so
+     macOS, iOS and Safari render native San Francisco — the closest
+     authentic match to an Apple-HIG feel available without a licensed
+     font file. Clash Display stays on the wordmark only (brand identity,
+     not system text) — it happens to be free, so it's the real thing. */
+  --font-display: 'Clash Display', 'General Sans', 'Inter', sans-serif;
+  --font-headline: -apple-system, BlinkMacSystemFont, 'General Sans', 'Inter', sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+  /* Apple's standard UI easing (used across macOS/iOS system animations). */
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background: #ffffff;
+}
+
+body {
+  position: relative;
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Full-viewport background photography ----
+   Fixed to the screen and always covers it completely (like a native
+   full-bleed hero background), independent of page height. */
+.bg-layer {
+  position: fixed;
+  left: 0;
+  width: 100vw;
+  pointer-events: none;
+  user-select: none;
+  display: block;
+  z-index: 0;
+}
+
+.bg-sky {
+  top: 0;
+  height: 100vh;
+  object-fit: cover;
+}
+
+/* Grass sits IN FRONT of the preview card (matches the Figma paint order),
+   giving a layered depth-of-field look — but kept as a low, quiet accent
+   strip rather than a dominant shape, so the sky and hero content get the
+   negative space to breathe (Apple HIG: one focal point, everything else
+   recedes).
+
+   This asset (grassv2.png) is a purpose-cropped wide strip with a real,
+   gradually-feathered alpha edge (verified pixel-by-pixel: transparent
+   for the top ~40-80% depending on x, fading in smoothly over ~30px —
+   no hard cut). Shown at its own true aspect ratio via aspect-ratio
+   rather than forced into an arbitrary vh height, so nothing crops into
+   that fade unpredictably — which is what produced the hard seam line
+   with the previous asset. bottom:0 keeps it anchored to the very
+   bottom of the screen, "only on the bottom portion" as intended. */
+.bg-grass {
+  bottom: 0;
+  height: auto;
+  aspect-ratio: 3456 / 724;
+  object-fit: cover;
+  z-index: 2;
+}
+
+/* ---- Wordmark, top left ---- */
+.logo-mark {
+  position: absolute;
+  z-index: 3;
+  left: 6.5vw;
+  top: 4.5vh;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(26px, 2.4vw, 44px);
+  line-height: normal;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #ffffff;
+  white-space: nowrap;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.12);
+}
+
+/* ---- Hero copy block ----
+   Vertically centered (top:50% + translateY(-50%)) instead of a fixed vh
+   offset — the Figma composition already centers this block almost
+   exactly (558px midpoint vs. 558.5px canvas center), and centering it
+   properly here means it stays correctly placed on ANY viewport height
+   instead of being positioned for one specific aspect ratio. A fixed vh
+   number is what made short/wide laptop screens push content toward the
+   bottom edge or off it. */
+.hero-copy {
+  position: absolute;
+  z-index: 3;
+  left: 6.5vw;
+  top: 50%;
+  transform: translateY(-50%);
+  width: min(30vw, 540px);
+  min-width: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3.2vh;
+}
+
+.hero-copy__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  width: 100%;
+}
+
+.hero-heading {
+  margin: 0;
+  width: 100%;
+  font-family: var(--font-headline);
+  font-weight: 300;
+  font-size: clamp(36px, 3.7vw, 66px);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--heading-dark);
+}
+
+.hero-heading__light {
+  color: var(--heading-light);
+  font-weight: 300;
+}
+
+.hero-heading__strong {
+  font-weight: 500;
+  color: var(--heading-dark);
+}
+
+.hero-sub {
+  margin: 0;
+  width: 100%;
+  max-width: 46ch;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: clamp(15px, 1.1vw, 19px);
+  line-height: 1.55;
+  color: var(--body-gray);
+}
+
+/* ---- Waitlist form ---- */
+.hero-form {
+  width: min(27vw, 470px);
+  min-width: 320px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.email-pill {
+  width: 100%;
+  height: clamp(54px, 3.6vw, 64px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: #ffffff;
+  border: 1px solid #eef0ee;
+  border-radius: 999px;
+  padding: 6px 6px 6px 20px;
+  box-shadow:
+    0 1px 2px rgba(10, 40, 30, 0.04),
+    0 8px 20px rgba(10, 40, 30, 0.06);
+  transition: box-shadow 0.2s var(--ease-standard), border-color 0.2s var(--ease-standard);
+}
+
+.email-pill:focus-within {
+  border-color: rgba(2, 153, 108, 0.35);
+  box-shadow:
+    0 1px 2px rgba(10, 40, 30, 0.04),
+    0 8px 20px rgba(10, 40, 30, 0.08),
+    0 0 0 4px rgba(2, 153, 108, 0.12);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.email-pill__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: clamp(14px, 0.95vw, 16px);
+  color: #1f2422;
+}
+
+.email-pill__input::placeholder {
+  color: #9aa19d;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: clamp(14px, 0.95vw, 16px);
+}
+
+.cta-btn {
+  position: relative;
+  flex-shrink: 0;
+  border: none;
+  cursor: pointer;
+  padding: 8px 8px 8px 18px;
+  border-radius: 999px;
+  overflow: hidden;
+  background-image: linear-gradient(
+    104.998deg,
+    rgb(0, 202, 125) 3.2609%,
+    rgb(8, 177, 117) 50.029%,
+    rgb(0, 196, 121) 73.413%,
+    rgb(100, 230, 180) 96.797%
+  );
+  box-shadow:
+    0px 1.037px 1.353px 0px rgba(0, 229, 141, 0.15),
+    0px 0px 0px 1.396px #ffffff,
+    0 10px 24px rgba(2, 153, 108, 0.22);
+  transition: transform 0.18s var(--ease-standard), box-shadow 0.18s var(--ease-standard), filter 0.18s var(--ease-standard);
+}
+
+.cta-btn:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.cta-btn:active {
+  transform: scale(0.97);
+  filter: brightness(0.98);
+}
+
+.cta-btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0px 1.037px 1.353px 0px rgba(0, 229, 141, 0.15),
+    0px 0px 0px 1.396px #ffffff,
+    0 10px 24px rgba(2, 153, 108, 0.22),
+    0 0 0 4px rgba(2, 153, 108, 0.28);
+}
+
+.cta-btn__sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 0px 0.279px 5.027px 0.559px #d9fff0,
+    inset 0px 0.279px 1.117px 0.559px #d9fff0;
+}
+
+.cta-btn__content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cta-btn__label {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: clamp(13px, 0.95vw, 16px);
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.cta-btn__icon {
+  width: clamp(26px, 1.85vw, 32px);
+  height: clamp(26px, 1.85vw, 32px);
+  border-radius: 999px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.cta-btn__icon img {
+  width: 36%;
+  height: 36%;
+  display: block;
+}
+
+.hero-form__note {
+  margin: 0;
+  padding: 0 10px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: clamp(12px, 0.8vw, 14px);
+  color: var(--heading-light);
+  transition: color 0.2s var(--ease-standard);
+}
+
+.hero-form__note.success {
+  color: var(--brand);
+}
+
+/* ---- Floating product preview: real frosted glass -------------------------
+   A genuine glass panel — translucent fill + backdrop-filter blur of the
+   sky behind it, plus a soft edge highlight — matching the Figma card
+   (rgba(255,255,255,0.46), 26px radius) instead of a bare image floating
+   on the background. Sits BEHIND the grass layer (z-index 1 vs grass's 2)
+   so the hill overlaps its lower edge — the depth effect from the Figma
+   paint order.
+
+   Sized by HEIGHT — 77.9vh (=870/1117, the exact Figma ratio), capped at
+   870px (its true native size — never rendered larger than Figma spec
+   even on huge screens) — rather than by width. A wide-but-short laptop
+   screen was previously sizing this purely off vw, so the card could
+   grow taller than the visible viewport and clip at the bottom (no
+   scrolling on this page); deriving width from a vh-based height fixes
+   that. top:9.13vh (=102/1117, the exact Figma offset) reproduces the
+   reference layout exactly at 1728x1117 while still scaling down
+   gracefully on shorter viewports. */
+.preview-card {
+  position: absolute;
+  z-index: 1;
+  right: 6.02vw;
+  top: 9.13vh;
+  height: min(77.9vh, 870px);
+  width: auto;
+  aspect-ratio: 519 / 870;
+  border-radius: clamp(16px, 1.5vw, 26px);
+  background: rgba(255, 255, 255, 0.4);
+  -webkit-backdrop-filter: blur(28px) saturate(150%);
+  backdrop-filter: blur(28px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  /* Apple-style layered elevation: a tight contact shadow, a mid falloff,
+     and a soft far ambient shadow, stacked — reads as one smooth, diffuse
+     shadow rather than a single hard-edged drop shadow. */
+  box-shadow:
+    0 1px 2px rgba(10, 40, 30, 0.06),
+    0 8px 24px rgba(10, 40, 30, 0.10),
+    0 32px 64px rgba(10, 40, 30, 0.16),
+    0 64px 120px rgba(10, 40, 30, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* "Lumid Ai" gradient wordmark inside the glass card, above the phone —
+   matches the original Figma position exactly (17px from top, centered
+   over the phone). Without this the video content reads as filling the
+   card edge-to-edge with nothing above it, which is what made the phone
+   UI look oversized relative to the card. */
+.preview-card__logo {
+  position: absolute;
+  left: 37.11%;
+  top: 1.95%;
+  width: 25.43%;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(14px, 1.7vw, 26px);
+  line-height: normal;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background-image: linear-gradient(
+    136.52deg,
+    rgb(22, 93, 0) 2.2914%,
+    rgb(48, 136, 21) 46.076%,
+    rgb(76, 162, 44) 71.93%,
+    rgb(136, 217, 95) 115.74%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Inset to exactly where the phone sat inside the original 519x870 Figma
+   card (offset 94,71, size 330x717) — this video is cropped tight to just
+   the UI with no surrounding canvas, so it drops straight into that same
+   slot and the glass shows as a quiet frame/margin around it, mostly
+   along the top (where the wordmark now sits) and the sides. */
+.preview-card__video {
+  position: absolute;
+  left: 18.11%;
+  top: 8.16%;
+  width: 63.58%;
+  height: 82.41%;
+  border-radius: clamp(10px, 1vw, 18px);
+  display: block;
+  object-fit: cover;
+  box-shadow: 0 4px 20px rgba(10, 40, 30, 0.12);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ==========================================================================
+   MOBILE — a rethought layout, not the desktop canvas scaled down.
+
+   Design decisions (see reference/adapt.md — adaptation is rethinking the
+   experience for the new context, not scaling pixels):
+
+   - The headline, the promise, and the waitlist form all land inside the
+     first screen. The Figma mobile frame put ~150px of dead air between
+     the logo and the headline, pushing the CTA below the fold — the exact
+     "trap" the brief warned about. Fixed here: tight hero, CTA always
+     visible without scrolling.
+   - The email field and the CTA are two separate full-width, stacked
+     elements instead of one pill trying to fit both an input and a full
+     sentence-length button on a 375px screen. Thumb-first, full-width,
+     each with a comfortable ≥48px touch target.
+   - The product demo (the long, scrollable chat transcript on desktop) is
+     a deliberate second beat below a scroll cue, not a screen-and-a-half
+     of static content you hit immediately. Its video is lazy-loaded —
+     nothing downloads until that section actually scrolls into view
+     (see script.js) — because a 10MB autoplaying video on first paint on
+     a phone is a real cost, not a free flourish.
+   - The CTA repeats after the demo: once someone has scrolled through
+     proof, asking them to scroll back up to sign up is a lost conversion.
+   ========================================================================== */
+
+.desktop-only {
+  display: contents;
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: block;
+  }
+
+  html, body {
+    overflow-x: hidden;
+    background: #eef6f1;
+  }
+
+  body {
+    min-height: 100svh;
+  }
+}
+
+.mobile-page {
+  width: 100%;
+}
+
+/* ---- First screen: hero ---- */
+.mobile-hero {
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mobile-hero__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%;
+  z-index: 0;
+}
+
+/* Only the topbar needs help staying legible against the photo now (the
+   rest of the text lives on its own frosted panel below) — a light,
+   top-only vignette rather than a tint over the whole hero. */
+.mobile-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(0, 20, 15, 0.22) 0%, rgba(0, 20, 15, 0) 20%);
+  pointer-events: none;
+}
+
+.mobile-topbar {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  padding: max(20px, env(safe-area-inset-top)) 24px 0;
+}
+
+.mobile-logo {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.18);
+}
+
+/* A frosted sheet rising from the bottom edge — the same iOS material
+   language as Weather/Maps location cards, and the same glass system
+   already used for the product-preview card (translucent white,
+   backdrop-blur, soft top highlight). Putting the hero copy on its own
+   light surface, instead of white text straight on unpredictable sky
+   brightness, is what lets it use the SAME dark-teal type colors as the
+   desktop hero rather than a diverging white/scrim treatment. */
+.mobile-hero__content {
+  position: relative;
+  z-index: 2;
+  margin-top: auto;
+  padding: 30px 24px max(30px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  background: rgba(255, 255, 255, 0.68);
+  -webkit-backdrop-filter: blur(30px) saturate(160%);
+  backdrop-filter: blur(30px) saturate(160%);
+  border-radius: 28px 28px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow:
+    0 -1px 2px rgba(10, 40, 30, 0.04),
+    0 -16px 40px rgba(10, 40, 30, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.mobile-heading {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font-headline);
+  font-size: clamp(32px, 9.5vw, 44px);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+}
+
+.mobile-heading__light {
+  font-weight: 300;
+  color: var(--heading-light);
+}
+
+.mobile-heading__strong {
+  font-weight: 500;
+  color: var(--heading-dark);
+}
+
+.mobile-sub {
+  margin: 0;
+  max-width: 42ch;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--body-gray);
+}
+
+.mobile-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.mobile-input {
+  width: 100%;
+  height: 52px;
+  border: 1px solid #eef0ee;
+  border-radius: 16px;
+  padding: 0 18px;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(10, 40, 30, 0.04), 0 8px 20px rgba(10, 40, 30, 0.07);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 16px;
+  color: #1f2422;
+  transition: box-shadow 0.2s var(--ease-standard), border-color 0.2s var(--ease-standard);
+}
+
+.mobile-input::placeholder {
+  color: #9aa19d;
+}
+
+.mobile-input:focus {
+  outline: none;
+  border-color: rgba(2, 153, 108, 0.35);
+  box-shadow: 0 1px 2px rgba(10, 40, 30, 0.04), 0 8px 20px rgba(10, 40, 30, 0.07), 0 0 0 4px rgba(2, 153, 108, 0.16);
+}
+
+.mobile-cta {
+  position: relative;
+  width: 100%;
+  height: 54px;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  overflow: hidden;
+  background-image: linear-gradient(
+    104.998deg,
+    rgb(0, 202, 125) 3.2609%,
+    rgb(8, 177, 117) 50.029%,
+    rgb(0, 196, 121) 73.413%,
+    rgb(100, 230, 180) 96.797%
+  );
+  box-shadow:
+    0px 1px 2px rgba(0, 229, 141, 0.15),
+    0px 0px 0px 1.4px #ffffff,
+    0 10px 24px rgba(2, 153, 108, 0.28);
+  transition: transform 0.15s var(--ease-standard), filter 0.15s var(--ease-standard);
+}
+
+.mobile-cta:active {
+  transform: scale(0.97);
+  filter: brightness(0.98);
+}
+
+.mobile-cta:focus-visible {
+  outline: none;
+  box-shadow:
+    0px 1px 2px rgba(0, 229, 141, 0.15),
+    0px 0px 0px 1.4px #ffffff,
+    0 10px 24px rgba(2, 153, 108, 0.28),
+    0 0 0 4px rgba(2, 153, 108, 0.3);
+}
+
+.mobile-cta__sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 1px 6px 0.5px #d9fff0, inset 0 1px 1px 0.5px #d9fff0;
+}
+
+.mobile-cta__content {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 16px;
+  color: #ffffff;
+}
+
+.mobile-cta__icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mobile-cta__icon img {
+  width: 36%;
+  height: 36%;
+  display: block;
+}
+
+.mobile-form__note {
+  margin: 2px 0 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--heading-light);
+  transition: color 0.2s var(--ease-standard);
+}
+
+.mobile-form__note.success {
+  color: var(--brand);
+}
+
+/* Invitation to scroll — sits in normal flow right after the form (not
+   floated over it) so it never overlaps the note text no matter how tall
+   the hero content gets on a short phone. The one authored motion moment
+   on this screen: a slow, gentle rise-and-settle, not a constant
+   distracting bounce, and it stops entirely for anyone who has asked for
+   reduced motion. */
+.mobile-scrollcue {
+  align-self: center;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(2, 153, 108, 0.18);
+  background: rgba(2, 153, 108, 0.07);
+  color: var(--brand);
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 12px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  animation: scrollcue-drift 2.6s var(--ease-standard) infinite;
+}
+
+@keyframes scrollcue-drift {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-scrollcue {
+    animation: none;
+  }
+}
+
+/* ---- Second screen: the product demo ---- */
+.mobile-preview {
+  position: relative;
+  padding: 56px 20px max(48px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  background: linear-gradient(180deg, #eef6f1 0%, #e4f2ea 100%);
+  text-align: center;
+}
+
+.mobile-preview__intro {
+  margin: 0;
+  max-width: 34ch;
+  font-family: var(--font-headline);
+  font-weight: 400;
+  font-size: 19px;
+  line-height: 1.4;
+  color: var(--heading-dark);
+}
+
+.mobile-preview__card {
+  position: relative;
+  width: min(78vw, 320px);
+  aspect-ratio: 519 / 870;
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.5);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 1px 2px rgba(10, 40, 30, 0.06),
+    0 16px 32px rgba(10, 40, 30, 0.14),
+    0 40px 80px rgba(10, 40, 30, 0.14),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+  overflow: hidden;
+}
+
+.mobile-preview__logo {
+  position: absolute;
+  left: 37.11%;
+  top: 1.95%;
+  width: 25.43%;
+  text-align: center;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  background-image: linear-gradient(
+    136.52deg,
+    rgb(22, 93, 0) 2.2914%,
+    rgb(48, 136, 21) 46.076%,
+    rgb(76, 162, 44) 71.93%,
+    rgb(136, 217, 95) 115.74%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.mobile-preview__video {
+  position: absolute;
+  left: 18.11%;
+  top: 8.16%;
+  width: 63.58%;
+  height: 82.41%;
+  border-radius: 10px;
+  display: block;
+  object-fit: cover;
+  background: #f4f8f6;
+}
+
+.mobile-preview__cta {
+  width: min(88vw, 360px);
+}

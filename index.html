@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Lumid AI — Your Emotional Support System</title>
+<link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@600&f[]=general-sans@300,400&display=swap" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css?v=16" />
+</head>
+<body>
+
+  <!-- ============================================================
+       DESKTOP / LAPTOP / PC — unchanged, hidden below the mobile
+       breakpoint (see styles.css).
+       ============================================================ -->
+  <div class="desktop-only">
+
+    <!-- Full-viewport background: pure sky photo (bg) + a separate, wide
+         grass strip with real soft-edged alpha transparency (foreground),
+         shown at its own natural aspect ratio so it sits only on the
+         bottom portion with no cropping into its transparent fade. -->
+    <img class="bg-layer bg-sky" src="assets/images/bgsky.png" alt="" />
+    <img class="bg-layer bg-grass" src="assets/images/grassv2.png" alt="" />
+
+    <!-- Top-left wordmark -->
+    <div class="logo-mark">LUMID AI</div>
+
+    <!-- Headline + copy + waitlist form -->
+    <section class="hero-copy">
+      <div class="hero-copy__text">
+        <h1 class="hero-heading">
+          <span class="hero-heading__light">Your emotional </span><br /><span class="hero-heading__strong">support system.</span>
+        </h1>
+        <p class="hero-sub">A calmer way to understand what you're feeling, make sense of what's keeping you stuck, and move forward.</p>
+      </div>
+
+      <div class="hero-form">
+        <form class="email-pill" id="waitlistForm">
+          <label class="visually-hidden" for="email">Your Email</label>
+          <input class="email-pill__input" id="email" name="email" type="email" placeholder="Your Email" autocomplete="email" required />
+          <button class="cta-btn" type="submit">
+            <span class="cta-btn__glow" aria-hidden="true"></span>
+            <span class="cta-btn__content">
+              <span class="cta-btn__label">Get Started with LUMID AI</span>
+              <span class="cta-btn__icon"><img src="assets/images/cta-arrow-icon.svg" alt="" /></span>
+            </span>
+            <span class="cta-btn__sheen" aria-hidden="true"></span>
+          </button>
+        </form>
+        <p class="hero-form__note" id="formNote">*Limited early access</p>
+      </div>
+    </section>
+
+    <!-- Floating product preview: a real frosted-glass card (backdrop blur
+         of the sky behind it, translucent white fill, soft edge highlight)
+         holding the phone chat animation — cropped tight to just the UI
+         (no gray canvas margin) so the glass card is the only "frame". -->
+    <div class="preview-card" aria-hidden="true">
+      <div class="preview-card__logo">LUMID AI</div>
+      <video
+        class="preview-card__video"
+        src="assets/video/phone-preview.webm"
+        poster="assets/images/phone-preview-poster.png"
+        autoplay
+        muted
+        loop
+        playsinline
+        preload="auto"
+      ></video>
+    </div>
+
+  </div>
+
+  <!-- ============================================================
+       MOBILE — a rethought layout, not the desktop canvas scaled
+       down. Headline, promise and the waitlist form all land in the
+       first viewport (no dead space before the CTA); the product
+       demo is a deliberate second beat you scroll to, not a mile of
+       static screenshot. The video only loads once that beat is
+       actually in view — see script.js.
+       ============================================================ -->
+  <div class="mobile-only mobile-page">
+
+    <div class="mobile-hero">
+      <img class="mobile-hero__bg" src="assets/images/bgsky.png" alt="" />
+
+      <header class="mobile-topbar">
+        <span class="mobile-logo">LUMID AI</span>
+      </header>
+
+      <div class="mobile-hero__content">
+        <h1 class="mobile-heading">
+          <span class="mobile-heading__light">Your emotional</span>
+          <span class="mobile-heading__strong">support system.</span>
+        </h1>
+        <p class="mobile-sub">A calmer way to understand what you're feeling, make sense of what's keeping you stuck, and move forward.</p>
+
+        <form class="mobile-form" id="waitlistFormMobile" novalidate>
+          <label class="visually-hidden" for="email-mobile">Your email</label>
+          <input class="mobile-input" id="email-mobile" name="email" type="email" inputmode="email" placeholder="Your email" autocomplete="email" required />
+          <button class="mobile-cta" type="submit">
+            <span class="mobile-cta__glow" aria-hidden="true"></span>
+            <span class="mobile-cta__content">
+              <span>Get started with Lumid AI</span>
+              <span class="mobile-cta__icon"><img src="assets/images/cta-arrow-icon.svg" alt="" /></span>
+            </span>
+            <span class="mobile-cta__sheen" aria-hidden="true"></span>
+          </button>
+          <p class="mobile-form__note" id="formNoteMobile">*Limited early access — takes 10 seconds</p>
+        </form>
+
+        <button class="mobile-scrollcue" type="button" data-scroll-target="mobilePreview">
+          <span>See it in action</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M3.5 6L8 10.5L12.5 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <section class="mobile-preview" id="mobilePreview">
+      <p class="mobile-preview__intro">Here's Lumid mid-conversation — noticing the pattern before you have to name it.</p>
+
+      <div class="mobile-preview__card">
+        <div class="mobile-preview__logo">LUMID AI</div>
+        <video
+          class="mobile-preview__video"
+          id="mobilePreviewVideo"
+          poster="assets/images/phone-preview-poster.png"
+          muted
+          loop
+          playsinline
+          preload="none"
+          data-src="assets/video/phone-preview.webm"
+        ></video>
+      </div>
+
+      <div class="mobile-preview__cta">
+        <form class="mobile-form mobile-form--compact" id="waitlistFormMobile2" novalidate>
+          <label class="visually-hidden" for="email-mobile-2">Your email</label>
+          <input class="mobile-input" id="email-mobile-2" name="email" type="email" inputmode="email" placeholder="Your email" autocomplete="email" required />
+          <button class="mobile-cta" type="submit">
+            <span class="mobile-cta__glow" aria-hidden="true"></span>
+            <span class="mobile-cta__content">
+              <span>Get started with Lumid AI</span>
+              <span class="mobile-cta__icon"><img src="assets/images/cta-arrow-icon.svg" alt="" /></span>
+            </span>
+            <span class="mobile-cta__sheen" aria-hidden="true"></span>
+          </button>
+          <p class="mobile-form__note" id="formNoteMobile2">*Limited early access — takes 10 seconds</p>
+        </form>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="script.js?v=8"></script>
+</body>
+</html>
