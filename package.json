@@ -1,0 +1,9 @@
+{
+  "name": "lumid-ai-waiting-page",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lumid AI waiting-list landing page, with a Vercel + Neon Postgres backend for waitlist signups.",
+  "dependencies": {
+    "@neondatabase/serverless": "^0.10.4"
+  }
+}
