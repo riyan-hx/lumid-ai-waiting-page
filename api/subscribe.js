@@ -7,6 +7,7 @@
 
 const { getSql, getClientIp } = require('./_lib/db');
 const { checkRateLimit } = require('./_lib/rateLimit');
+const { notifyNewSignup } = require('./_lib/notify');
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_EMAIL_LENGTH = 254; // RFC 5321
@@ -91,11 +92,21 @@ module.exports = async (req, res) => {
 
     const userAgent = String(req.headers['user-agent'] || '').slice(0, 300);
 
-    await sql`
+    const inserted = await sql`
       INSERT INTO subscribers (email, source, user_agent)
       VALUES (${email}, ${source}, ${userAgent})
       ON CONFLICT (email) DO NOTHING
+      RETURNING id
     `;
+
+    // Only notify on a genuinely new signup, not a repeat submission of the
+    // same email (ON CONFLICT DO NOTHING returns no row in that case).
+    // Awaited (not fire-and-forget) because a serverless function can be
+    // frozen/torn down right after the response is sent, which would kill
+    // an in-flight fetch before Resend received it.
+    if (inserted.length > 0) {
+      await notifyNewSignup({ email, source });
+    }
 
     res.status(200).json({ ok: true });
   } catch (err) {
