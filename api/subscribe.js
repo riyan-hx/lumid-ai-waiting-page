@@ -1,19 +1,15 @@
 // POST /api/subscribe
 // Stores a waitlist signup (email + timestamp + light metadata) in Postgres.
-// Uses whichever pooled connection string Vercel's Neon integration injected
-// (checked in this order since the exact name can vary by integration
-// version) — no manual configuration needed beyond connecting the database
-// in the Vercel dashboard.
+// Rate-limited per IP (DB-backed, survives cold starts) so this can't be
+// used to flood the table with junk signups — 8 submissions per hour per IP,
+// which comfortably covers a real visitor retrying a typo but blocks a bot
+// hammering the endpoint.
 
-const { neon } = require('@neondatabase/serverless');
-
-const CONNECTION_STRING =
-  process.env.DATABASE_URL ||
-  process.env.POSTGRES_URL ||
-  process.env.STORAGE_DATABASE_URL ||
-  process.env.STORAGE_POSTGRES_URL;
+const { getSql, getClientIp } = require('./_lib/db');
+const { checkRateLimit } = require('./_lib/rateLimit');
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_EMAIL_LENGTH = 254; // RFC 5321
 
 let schemaReady = null;
 
@@ -33,10 +29,6 @@ async function ensureSchema(sql) {
 }
 
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
   if (req.method === 'OPTIONS') {
     res.status(204).end();
     return;
@@ -47,10 +39,33 @@ module.exports = async (req, res) => {
     return;
   }
 
-  if (!CONNECTION_STRING) {
+  const sql = getSql();
+  if (!sql) {
     console.error('subscribe: no database connection string configured');
     res.status(500).json({ ok: false, error: 'Server is not configured yet. Try again shortly.' });
     return;
+  }
+
+  const ip = getClientIp(req);
+
+  try {
+    const { allowed, retryAfter } = await checkRateLimit(sql, {
+      bucket: 'subscribe',
+      identifier: ip,
+      limit: 8,
+      windowSeconds: 60 * 60,
+    });
+
+    if (!allowed) {
+      res.setHeader('Retry-After', String(retryAfter));
+      res.status(429).json({ ok: false, error: 'Too many attempts. Please try again later.' });
+      return;
+    }
+  } catch (err) {
+    console.error('subscribe: rate limit check failed', err);
+    // Don't block a real signup just because the rate-limit table had a
+    // hiccup — the unique constraint on email still prevents duplicate
+    // spam of the same address either way.
   }
 
   let body = req.body;
@@ -66,13 +81,12 @@ module.exports = async (req, res) => {
   const email = String(body.email || '').trim().toLowerCase();
   const source = String(body.source || 'unknown').slice(0, 40);
 
-  if (!EMAIL_RE.test(email)) {
+  if (!email || email.length > MAX_EMAIL_LENGTH || !EMAIL_RE.test(email)) {
     res.status(400).json({ ok: false, error: 'Please enter a valid email address.' });
     return;
   }
 
   try {
-    const sql = neon(CONNECTION_STRING);
     await ensureSchema(sql);
 
     const userAgent = String(req.headers['user-agent'] || '').slice(0, 300);

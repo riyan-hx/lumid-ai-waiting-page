@@ -1,15 +1,11 @@
 // GET /api/subscribers
-// Returns the waitlist signups as JSON. Protected by ADMIN_SECRET — pass it
-// as either an `x-admin-secret` header or a `?key=` query param. Used by
-// admin.html; not linked from anywhere public.
+// Returns the waitlist signups as JSON. Requires a valid admin session
+// cookie (set by /api/admin-login) — no more accepting the raw secret as a
+// header/query param, so nothing sensitive has to be handled by client-side
+// JS after the initial login.
 
-const { neon } = require('@neondatabase/serverless');
-
-const CONNECTION_STRING =
-  process.env.DATABASE_URL ||
-  process.env.POSTGRES_URL ||
-  process.env.STORAGE_DATABASE_URL ||
-  process.env.STORAGE_POSTGRES_URL;
+const { getSql } = require('./_lib/db');
+const { verifySession } = require('./_lib/session');
 
 module.exports = async (req, res) => {
   if (req.method !== 'GET') {
@@ -17,26 +13,24 @@ module.exports = async (req, res) => {
     return;
   }
 
-  const providedKey = req.headers['x-admin-secret'] || (req.query && req.query.key);
   const expectedKey = process.env.ADMIN_SECRET;
-
   if (!expectedKey) {
     res.status(500).json({ ok: false, error: 'ADMIN_SECRET is not configured on the server.' });
     return;
   }
 
-  if (!providedKey || providedKey !== expectedKey) {
+  if (!verifySession(req, expectedKey)) {
     res.status(401).json({ ok: false, error: 'Unauthorized' });
     return;
   }
 
-  if (!CONNECTION_STRING) {
+  const sql = getSql();
+  if (!sql) {
     res.status(500).json({ ok: false, error: 'Database is not configured yet.' });
     return;
   }
 
   try {
-    const sql = neon(CONNECTION_STRING);
     const rows = await sql`
       SELECT id, email, source, created_at
       FROM subscribers
